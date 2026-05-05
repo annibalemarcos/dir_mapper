@@ -1,0 +1,50 @@
+{
+  "name": "dir-mapper",
+  "version": "0.2.0",
+  "description": "Mapeador de estrutura de diretórios — versão estável com Python embutido",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build-python": "pyinstaller --onefile --name dir_mapper --console --distpath bin --workpath build/pyinstaller --specpath build/pyinstaller --clean dir_mapper_cli.py",
+    "build-win": "electron-builder --win",
+    "build-mac": "electron-builder --mac",
+    "build-linux": "electron-builder --linux",
+    "build-all-win": "npm run build-python && electron-builder --win"
+  },
+  "keywords": ["directory", "mapper", "tree", "electron"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.dirmapper.app",
+    "productName": "DIR MAP",
+    "directories": { "output": "dist" },
+    "files": [
+      "main.js",
+      "index.html",
+      "dir_mapper.py",
+      "package.json"
+    ],
+    "extraResources": [
+      { "from": "dir_mapper.py", "to": "dir_mapper.py" },
+      {
+        "from": "bin/",
+        "to": "bin/",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
+    },
+    "mac": { "target": "dmg" },
+    "linux": { "target": "AppImage", "category": "Utility" }
+  }
+}
