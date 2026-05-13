@@ -1,106 +1,275 @@
-# DIR MAP v0.2 — Desktop (Electron + Python embutido)
+# DIR MAP
 
-Versão estável do mapeador de diretórios. **O usuário final não precisa instalar Python** — o interpretador é empacotado dentro do `.exe` via PyInstaller.
+**DIR MAP** é um aplicativo desktop para mapear a estrutura de diretórios do computador e exportar o resultado em formatos úteis como **árvore/UML**, **JSON**, **diagrama textual**, **Markdown**, **TXT** e **JSON**.
 
----
-
-## ✨ O que mudou em relação à v0.1
-
-| Bug / Limitação | Correção na v0.2 |
-|---|---|
-| App **trava** em diretórios gigantes (esquecer de filtrar `node_modules`, `.git`...) | Lista padrão de pastas pesadas **pré-preenchida** + **limite de itens** (default 100k) + trava de profundidade máxima absoluta (50) |
-| Travamento sem possibilidade de cancelar | Botão **CANCELAR** que mata o processo imediatamente |
-| Recursão Python profunda podia estourar limites | Varredura **iterativa** com `os.scandir`, muito mais rápida |
-| Output sem feedback | Estatísticas: **nº de itens lidos**, **tempo decorrido** e badge **TRUNCADO** |
-| Usuário final precisava instalar Python | **Python embutido via PyInstaller** — basta instalar o `.exe`, nada mais |
-| `dir_mapper.py` perdido dentro do .exe empacotado | Empacotado corretamente como `extraResources` |
+A ideia é simples e boa: você escolhe uma pasta, o app varre os arquivos e subpastas, aplica filtros para não cair em buracos negros como `node_modules` e `.git`, e gera uma visão organizada da estrutura. É aquele tipo de ferramenta pequena que salva tempo quando você precisa documentar projeto, auditar pastas ou mostrar a estrutura de um sistema sem mandar um print capenga.
 
 ---
 
-## 🚀 Para o USUÁRIO FINAL
+## O que o projeto faz
 
-1. Baixar e executar `DIR MAP Setup 0.2.0.exe` (gerado pelo build).
-2. Pronto. Nenhuma dependência adicional.
+- Mapeia diretórios locais de forma visual.
+- Mostra a estrutura em formato de árvore.
+- Permite exportar o resultado como `.md`, `.json` ou `.txt`.
+- Permite copiar o resultado para a área de transferência.
+- Permite ocultar pastas específicas.
+- Permite ocultar extensões específicas.
+- Permite ocultar todos os arquivos e exibir apenas pastas.
+- Permite limitar a profundidade da varredura.
+- Permite limitar a quantidade máxima de itens lidos.
+- Evita travamentos em diretórios gigantes usando filtros e limite de segurança.
+- Tem botão de cancelamento para interromper a varredura.
+- Pode ser empacotado como `.exe` para Windows com Python embutido.
 
 ---
 
-## 🛠️ Para QUEM VAI BUILDAR (você)
+## Stack utilizada
 
-### Pré-requisitos (apenas na sua máquina, **não** no PC do usuário final):
-- **Node.js** ≥ 16 — https://nodejs.org
-- **Python** ≥ 3.8 — https://python.org
+- **Electron** — interface desktop.
+- **Node.js** — processo principal do app e integração com o sistema.
+- **Python** — motor de varredura dos diretórios.
+- **PyInstaller** — empacotamento do backend Python em executável.
+- **electron-builder** — geração do instalador desktop.
+- **HTML/CSS/JavaScript** — interface do usuário.
 
-### Build em 1 clique (Windows)
+---
+
+## Como funciona por baixo do capô
+
+O projeto é dividido em duas partes principais:
+
+1. **Interface Electron**
+   - Exibe a janela do aplicativo.
+   - Permite selecionar uma pasta.
+   - Envia as opções de mapeamento para o backend.
+   - Recebe o resultado e mostra na tela.
+   - Salva/exporta arquivos.
+
+2. **Backend Python**
+   - Recebe os parâmetros via JSON.
+   - Varre o diretório usando `os.scandir`.
+   - Aplica filtros de pastas, extensões, profundidade e limite de itens.
+   - Gera a saída nos formatos disponíveis.
+   - Retorna o resultado para o Electron.
+
+Quando empacotado, o Electron tenta usar primeiro o binário `dir_mapper.exe` gerado pelo PyInstaller. Se ele não existir, cai no modo de desenvolvimento e tenta usar o Python instalado no sistema.
+
+---
+
+## Formatos de saída
+
+### Árvore / UML
+
+```txt
+meu-projeto/
+├── app/
+│   ├── main.py
+│   └── routes.py
+├── static/
+└── README.md
+```
+
+### JSON
+
+```json
+{
+  "name": "meu-projeto",
+  "type": "directory",
+  "children": []
+}
+```
+
+### Diagrama textual
+
+```txt
+┌─────────────┐
+│ meu-projeto │
+└─────────────┘
+```
+
+---
+
+## Recursos de segurança
+
+Para evitar que o app trave ao abrir pastas gigantes, ele já vem com algumas proteções:
+
+- Pastas pesadas ignoradas por padrão:
+
+```txt
+node_modules, .git, __pycache__, .venv, venv, dist, build, .next, .cache, target, .idea, .vscode
+```
+
+- Limite padrão de itens: **100.000**.
+- Profundidade máxima absoluta: **50 níveis**.
+- Varredura iterativa, evitando recursão profunda.
+- Botão **Cancelar** para matar o processo em andamento.
+- Ignora links simbólicos, sockets e entradas especiais.
+- Trata erros de permissão sem quebrar o app inteiro.
+
+---
+
+## Estrutura do projeto
+
+```txt
+DIR MAP/
+├── build.bat                 # Build completo para Windows
+├── dir_mapper.py             # Motor principal de varredura em Python
+├── dir_mapper_cli.py         # Entrada CLI usada pelo PyInstaller
+├── index.html                # Interface do app
+├── main.js                   # Processo principal do Electron
+├── open_cmd.bat              # Atalho para abrir terminal
+├── package.json              # Configuração Node/Electron
+├── requirements-build.txt    # Dependências de build Python
+└── README.md                 # Documentação do projeto
+```
+
+---
+
+## Como rodar em modo desenvolvimento
+
+### Pré-requisitos
+
+Você precisa ter instalado:
+
+- **Node.js 16+**
+- **Python 3.8+**
+
+### Instale as dependências
+
+```bash
+npm install
+```
+
+### Rode o app
+
+```bash
+npm start
+```
+
+---
+
+## Como gerar o executável para Windows
+
+O projeto já inclui um arquivo `build.bat` para automatizar o processo.
+
 ```bash
 build.bat
 ```
-Saída:
-- `dist\DIR MAP Setup 0.2.0.exe` — instalador NSIS
-- `dist\win-unpacked\DIR MAP.exe` — versão portátil
 
-### Build manual (passo a passo)
-```bash
-npm install
-pip install pyinstaller
-npm run build-python    # gera bin\dir_mapper.exe (~7 MB)
-npm run build-win       # gera dist\DIR MAP Setup 0.2.0.exe
+Ele executa, em sequência:
+
+1. Instala as dependências Node.
+2. Instala/atualiza o PyInstaller.
+3. Gera o binário Python `bin/dir_mapper.exe`.
+4. Gera o instalador Electron.
+
+Ao final, os arquivos principais ficam em:
+
+```txt
+dist\DIR MAP Setup 0.2.0.exe
+dist\win-unpacked\DIR MAP.exe
 ```
 
-### Build em uma única linha
+---
+
+## Build manual
+
+Caso prefira rodar etapa por etapa:
+
+```bash
+npm install
+python -m pip install pyinstaller
+npm run build-python
+npm run build-win
+```
+
+Ou tudo em uma linha:
+
 ```bash
 npm run build-all-win
 ```
 
 ---
 
-## 🧠 Como funciona internamente
+## Teste direto do backend Python
 
-1. O Electron (`main.js`) procura primeiro o binário standalone:
-   ```
-   process.resourcesPath/bin/dir_mapper.exe
-   ```
-2. Se encontrar, executa-o passando os parâmetros via JSON no stdin.
-3. Se **não** encontrar (modo dev, sem PyInstaller), cai em fallback: chama `python` ou `py` no sistema.
+Você também pode testar o motor de mapeamento sem abrir a interface Electron:
 
-→ Resultado: o `.exe` distribuído sempre funciona, **sem dependências externas**.
-
----
-
-## 🔒 Comportamento de segurança
-
-- Lista padrão de pastas ignoradas: `node_modules, .git, __pycache__, .venv, venv, dist, build, .next, .cache, target, .idea, .vscode`
-- Limite duro de **100.000 itens** por mapeamento (configurável na UI)
-- Profundidade máxima absoluta: **50 níveis**
-- Botão **CANCELAR** envia `SIGTERM`/`SIGKILL` ao processo
-
----
-
-## 📂 Estrutura
-
-```
-desktop/
-├── main.js                    # Processo principal Electron (IPC, spawn)
-├── index.html                 # UI dark/âmbar
-├── dir_mapper.py              # Lógica de varredura iterativa + formatadores
-├── dir_mapper_cli.py          # Entry point empacotado pelo PyInstaller
-├── package.json               # Config electron-builder (NSIS)
-├── build.bat                  # Build completo em 1 clique (Windows)
-├── requirements-build.txt     # pyinstaller (apenas para build)
-└── README.md
-```
-
----
-
-## 🧪 Teste rápido (sem UI)
-
-Após o build:
 ```bash
-echo {"path":"C:\\Users\\eu\\meu-projeto","format_type":"uml"} | bin\dir_mapper.exe
+python dir_mapper.py "C:\\caminho\\da\\pasta" uml
 ```
-Saída: `{"content": "...", "items": N, "truncated": false, "elapsed_ms": M}`
+
+Ou, depois de gerar o binário:
+
+```bash
+echo {"path":"C:\\caminho\\da\\pasta","format_type":"uml"} | bin\dir_mapper.exe
+```
 
 ---
 
-## 🌐 Versão Web
+## Scripts disponíveis
 
-Existe também a versão **100% web** (sem instalação, sem Python): basta abrir o link do app no navegador. Faz tudo client-side via `webkitdirectory`.
+No `package.json`:
+
+```json
+{
+  "start": "electron .",
+  "build-python": "pyinstaller --onefile --name dir_mapper --console --distpath bin --workpath build/pyinstaller --specpath build/pyinstaller --clean dir_mapper_cli.py",
+  "build-win": "electron-builder --win",
+  "build-mac": "electron-builder --mac",
+  "build-linux": "electron-builder --linux",
+  "build-all-win": "npm run build-python && electron-builder --win"
+}
+```
+
+---
+
+## Status do projeto
+
+O projeto já tem uma base funcional e utilizável, principalmente no Windows. Ainda assim, vale tratar como uma versão em evolução.
+
+Pontos que já estão bem resolvidos:
+
+- Varredura iterativa.
+- Filtros básicos.
+- Exportação.
+- Cancelamento.
+- Empacotamento com Python embutido.
+- Interface simples e direta.
+
+Pontos que podem melhorar:
+
+- Melhorar a interface visual.
+- Adicionar tema claro/escuro.
+- Criar página de configurações.
+- Adicionar opção de salvar presets de filtros.
+- Adicionar testes automatizados.
+- Melhorar suporte a Linux/macOS.
+- Adicionar barra de progresso real para diretórios grandes.
+- Permitir exportação em HTML.
+- Permitir comparação entre dois mapas de diretórios.
+
+---
+
+## Ideias futuras
+
+- Modo “documentar projeto”, gerando automaticamente uma seção para README.
+- Comparador de versões de diretórios.
+- Relatório visual com contagem de arquivos por extensão.
+- Estatísticas de tamanho por pasta.
+- Exportação para Mermaid.
+- Exportação para Graphviz.
+- Modo CLI completo, sem Electron.
+- Histórico dos últimos diretórios mapeados.
+
+---
+
+## Licença
+
+Este projeto está configurado como **MIT** no `package.json`.
+
+---
+
+## Observação
+
+Este README foi criado com base na análise dos arquivos do projeto: `main.js`, `index.html`, `dir_mapper.py`, `dir_mapper_cli.py`, `package.json`, `build.bat` e `requirements-build.txt`.
