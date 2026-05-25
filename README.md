@@ -255,8 +255,3 @@ Pontos que podem melhorar:
 
 Este projeto está configurado como **MIT** no `package.json`.
 
----
-
-## Observação
-
-Este README foi criado com base na análise dos arquivos do projeto: `main.js`, `index.html`, `dir_mapper.py`, `dir_mapper_cli.py`, `package.json`, `build.bat` e `requirements-build.txt`.
