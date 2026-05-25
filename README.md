@@ -251,19 +251,6 @@ Pontos que podem melhorar:
 
 ---
 
-## Ideias futuras
-
-- Modo “documentar projeto”, gerando automaticamente uma seção para README.
-- Comparador de versões de diretórios.
-- Relatório visual com contagem de arquivos por extensão.
-- Estatísticas de tamanho por pasta.
-- Exportação para Mermaid.
-- Exportação para Graphviz.
-- Modo CLI completo, sem Electron.
-- Histórico dos últimos diretórios mapeados.
-
----
-
 ## Licença
 
 Este projeto está configurado como **MIT** no `package.json`.
