@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // main.js - DIR MAP v0.3.3 (cancelamento + segurança + binário PyInstaller)
+=======
+// main.js - DIR MAP v0.2 (cancelamento + segurança + binário PyInstaller)
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
@@ -9,10 +13,17 @@ let activeProcess = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
+<<<<<<< HEAD
     width: 980,
     height: 900,
     resizable: true,
     minWidth: 760,
+=======
+    width: 720,
+    height: 820,
+    resizable: true,
+    minWidth: 600,
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
     minHeight: 700,
     webPreferences: {
       nodeIntegration: true,
@@ -20,7 +31,11 @@ function createWindow() {
     },
     backgroundColor: '#0e0d0c',
     autoHideMenuBar: true,
+<<<<<<< HEAD
     title: 'DIR MAP v0.3.3'
+=======
+    title: 'DIR MAP v0.2'
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
   });
   mainWindow.loadFile('index.html');
 }
@@ -206,7 +221,11 @@ print(map_directory_api(**data), end='')
   });
 });
 
+<<<<<<< HEAD
 ipcMain.handle('save-file', async (event, { content, extension, defaultName }) => {
+=======
+ipcMain.handle('save-file', async (event, { content, extension }) => {
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
   const filters = [];
   if (extension === 'md') filters.push({ name: 'Markdown', extensions: ['md'] });
   else if (extension === 'json') filters.push({ name: 'JSON', extensions: ['json'] });
@@ -215,7 +234,11 @@ ipcMain.handle('save-file', async (event, { content, extension, defaultName }) =
 
   const result = await dialog.showSaveDialog(mainWindow, {
     filters,
+<<<<<<< HEAD
     defaultPath: `${defaultName || 'dir_map'}.${extension}`,
+=======
+    defaultPath: `dir_map.${extension}`,
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
     title: `Salvar como .${extension}`
   });
   if (!result.canceled && result.filePath) {

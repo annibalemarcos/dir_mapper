@@ -1,5 +1,6 @@
 # DIR MAP
 
+<<<<<<< HEAD
 ![Windows](https://img.shields.io/badge/platform-Windows-blue)
 ![Electron](https://img.shields.io/badge/Electron-desktop-47848F)
 ![Python](https://img.shields.io/badge/Python-backend-3776AB)
@@ -32,12 +33,18 @@ https://github.com/annibalemarcos/dir_mapper/releases
 ```
 
 > Recomenda-se publicar instaladores, `.exe` e arquivos `.zip` na aba **Releases**, não diretamente dentro do repositório.
+=======
+**DIR MAP** é um aplicativo desktop para mapear a estrutura de diretórios do computador e exportar o resultado em formatos úteis como **árvore/UML**, **JSON**, **diagrama textual**, **Markdown**, **TXT** e **JSON**.
+
+A ideia é simples e boa: você escolhe uma pasta, o app varre os arquivos e subpastas, aplica filtros para não cair em buracos negros como `node_modules` e `.git`, e gera uma visão organizada da estrutura. É aquele tipo de ferramenta pequena que salva tempo quando você precisa documentar projeto, auditar pastas ou mostrar a estrutura de um sistema sem mandar um print capenga.
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 
 ---
 
 ## O que o projeto faz
 
 - Mapeia diretórios locais de forma visual.
+<<<<<<< HEAD
 - Exibe a estrutura em formato de árvore.
 - Mostra estatísticas gerais do diretório varrido.
 - Exibe tamanho total, quantidade de arquivos, pastas e profundidade máxima encontrada.
@@ -45,18 +52,27 @@ https://github.com/annibalemarcos/dir_mapper/releases
 - Exibe ranking das extensões que mais ocupam espaço.
 - Permite exportar o resultado como `.md`, `.json` ou `.txt`.
 - Permite exportar somente o dashboard/estatísticas em Markdown.
+=======
+- Mostra a estrutura em formato de árvore.
+- Permite exportar o resultado como `.md`, `.json` ou `.txt`.
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 - Permite copiar o resultado para a área de transferência.
 - Permite ocultar pastas específicas.
 - Permite ocultar extensões específicas.
 - Permite ocultar todos os arquivos e exibir apenas pastas.
 - Permite limitar a profundidade da varredura.
 - Permite limitar a quantidade máxima de itens lidos.
+<<<<<<< HEAD
 - Evita travamentos em diretórios gigantes usando filtros e limites de segurança.
+=======
+- Evita travamentos em diretórios gigantes usando filtros e limite de segurança.
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 - Tem botão de cancelamento para interromper a varredura.
 - Pode ser empacotado como `.exe` para Windows com Python embutido.
 
 ---
 
+<<<<<<< HEAD
 ## Uso básico
 
 1. Abra o **DIR MAP**.
@@ -83,6 +99,8 @@ O **DIR MAP** é útil para:
 
 ---
 
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 ## Stack utilizada
 
 - **Electron** — interface desktop.
@@ -98,6 +116,7 @@ O **DIR MAP** é útil para:
 
 O projeto é dividido em duas partes principais:
 
+<<<<<<< HEAD
 ### Interface Electron
 
 - Exibe a janela do aplicativo.
@@ -117,6 +136,23 @@ O projeto é dividido em duas partes principais:
 - Retorna o resultado para o Electron.
 
 Quando empacotado, o Electron tenta usar primeiro o binário `dir_mapper.exe` gerado pelo PyInstaller. Se ele não existir, o app cai no modo de desenvolvimento e tenta usar o Python instalado no sistema.
+=======
+1. **Interface Electron**
+   - Exibe a janela do aplicativo.
+   - Permite selecionar uma pasta.
+   - Envia as opções de mapeamento para o backend.
+   - Recebe o resultado e mostra na tela.
+   - Salva/exporta arquivos.
+
+2. **Backend Python**
+   - Recebe os parâmetros via JSON.
+   - Varre o diretório usando `os.scandir`.
+   - Aplica filtros de pastas, extensões, profundidade e limite de itens.
+   - Gera a saída nos formatos disponíveis.
+   - Retorna o resultado para o Electron.
+
+Quando empacotado, o Electron tenta usar primeiro o binário `dir_mapper.exe` gerado pelo PyInstaller. Se ele não existir, cai no modo de desenvolvimento e tenta usar o Python instalado no sistema.
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 
 ---
 
@@ -151,6 +187,7 @@ meu-projeto/
 └─────────────┘
 ```
 
+<<<<<<< HEAD
 ### Estatísticas em Markdown
 
 ```md
@@ -163,11 +200,17 @@ meu-projeto/
 - Média por arquivo: 176.4 KB
 ```
 
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 ---
 
 ## Recursos de segurança
 
+<<<<<<< HEAD
 Para evitar travamentos ao abrir pastas gigantes, o app já vem com proteções importantes:
+=======
+Para evitar que o app trave ao abrir pastas gigantes, ele já vem com algumas proteções:
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 
 - Pastas pesadas ignoradas por padrão:
 
@@ -178,7 +221,11 @@ node_modules, .git, __pycache__, .venv, venv, dist, build, .next, .cache, target
 - Limite padrão de itens: **100.000**.
 - Profundidade máxima absoluta: **50 níveis**.
 - Varredura iterativa, evitando recursão profunda.
+<<<<<<< HEAD
 - Botão **Cancelar** para encerrar a varredura em andamento.
+=======
+- Botão **Cancelar** para matar o processo em andamento.
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 - Ignora links simbólicos, sockets e entradas especiais.
 - Trata erros de permissão sem quebrar o app inteiro.
 
@@ -209,7 +256,10 @@ Você precisa ter instalado:
 
 - **Node.js 16+**
 - **Python 3.8+**
+<<<<<<< HEAD
 - **npm**
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 
 ### Instale as dependências
 
@@ -227,7 +277,11 @@ npm start
 
 ## Como gerar o executável para Windows
 
+<<<<<<< HEAD
 O projeto inclui um arquivo `build.bat` para automatizar o processo.
+=======
+O projeto já inclui um arquivo `build.bat` para automatizar o processo.
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 
 ```bash
 build.bat
@@ -236,7 +290,11 @@ build.bat
 Ele executa, em sequência:
 
 1. Instala as dependências Node.
+<<<<<<< HEAD
 2. Instala ou atualiza o PyInstaller.
+=======
+2. Instala/atualiza o PyInstaller.
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 3. Gera o binário Python `bin/dir_mapper.exe`.
 4. Gera o instalador Electron.
 
@@ -247,8 +305,11 @@ dist\DIR MAP Setup 0.2.0.exe
 dist\win-unpacked\DIR MAP.exe
 ```
 
+<<<<<<< HEAD
 > O número da versão pode mudar conforme o `package.json`.
 
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 ---
 
 ## Build manual
@@ -303,6 +364,7 @@ No `package.json`:
 
 ---
 
+<<<<<<< HEAD
 ## Observação sobre arquivos gerados
 
 Arquivos de build, instaladores, executáveis e pacotes compactados normalmente não precisam ficar versionados no repositório principal.
@@ -352,6 +414,22 @@ O projeto já tem uma base funcional e utilizável, principalmente no Windows. A
 - Interface simples e direta.
 
 ### Melhorias planejadas
+=======
+## Status do projeto
+
+O projeto já tem uma base funcional e utilizável, principalmente no Windows. Ainda assim, vale tratar como uma versão em evolução.
+
+Pontos que já estão bem resolvidos:
+
+- Varredura iterativa.
+- Filtros básicos.
+- Exportação.
+- Cancelamento.
+- Empacotamento com Python embutido.
+- Interface simples e direta.
+
+Pontos que podem melhorar:
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 
 - Melhorar a interface visual.
 - Adicionar tema claro/escuro.
@@ -365,6 +443,7 @@ O projeto já tem uma base funcional e utilizável, principalmente no Windows. A
 
 ---
 
+<<<<<<< HEAD
 ## Ideias futuras
 
 - Modo “documentar projeto”, gerando automaticamente uma seção para README.
@@ -396,10 +475,13 @@ O projeto já tem uma base funcional e utilizável, principalmente no Windows. A
 
 ---
 
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 ## Licença
 
 Este projeto está configurado como **MIT** no `package.json`.
 
+<<<<<<< HEAD
 ---
 
 ## Observação
@@ -413,3 +495,5 @@ Este README foi criado com base na análise dos arquivos do projeto:
 - `package.json`
 - `build.bat`
 - `requirements-build.txt`
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b

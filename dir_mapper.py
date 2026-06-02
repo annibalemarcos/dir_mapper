@@ -1,23 +1,42 @@
 """
 DIR MAP - Backend de varredura de diretórios
+<<<<<<< HEAD
 v0.3.2 - Dashboard com tamanho real independente dos filtros
+=======
+v0.2 - Versão estável com proteção contra travamento em diretórios gigantes
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 """
 import os
 import sys
 import json
 import time
 from pathlib import Path
+<<<<<<< HEAD
 from typing import List, Optional, Dict, Any, Tuple
 
+=======
+from typing import List, Optional, Dict, Any
+
+
+# Pastas comumente pesadas que NUNCA devem ser varridas a menos que o usuário
+# explicitamente queira. São adicionadas como ignoradas por padrão na UI.
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 DEFAULT_HEAVY_FOLDERS = [
     "node_modules", ".git", "__pycache__", ".venv", "venv",
     "dist", "build", ".next", ".cache", "target", ".idea",
     ".vscode", ".pytest_cache", ".mypy_cache", "coverage",
 ]
 
+<<<<<<< HEAD
 DEFAULT_MAX_ITEMS = 100_000
 DEFAULT_MAX_DEPTH_HARD = 50
 TOP_LIMIT = 12
+=======
+# Limites duros de segurança para impedir que a aplicação trave
+# mesmo se o usuário esquecer de configurar filtros.
+DEFAULT_MAX_ITEMS = 100_000      # itens (arquivos+pastas) totais
+DEFAULT_MAX_DEPTH_HARD = 50      # profundidade máxima absoluta
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 
 
 class ScanLimitExceeded(Exception):
@@ -25,6 +44,7 @@ class ScanLimitExceeded(Exception):
     pass
 
 
+<<<<<<< HEAD
 def human_size(num: int) -> str:
     try:
         value = float(num or 0)
@@ -40,6 +60,8 @@ def human_size(num: int) -> str:
     return f"{value:.2f} PB"
 
 
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 class DirectoryMapper:
     def __init__(self):
         self.hidden_folders: List[str] = []
@@ -49,7 +71,10 @@ class DirectoryMapper:
         self.max_items: int = DEFAULT_MAX_ITEMS
         self._items_seen: int = 0
         self._truncated: bool = False
+<<<<<<< HEAD
         self._stats: Dict[str, Any] = {}
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 
     def set_filters(
         self,
@@ -66,6 +91,7 @@ class DirectoryMapper:
         self.hide_files = hide_files
         self.max_depth = max_depth
         if max_items is not None and max_items > 0:
+<<<<<<< HEAD
             self.max_items = int(max_items)
 
     def _reset_stats(self, root: Path) -> None:
@@ -87,6 +113,9 @@ class DirectoryMapper:
             "avg_file_size": 0,
             "avg_file_size_human": "0 B",
         }
+=======
+            self.max_items = max_items
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 
     def _should_skip(self, name: str, is_file: bool) -> bool:
         if is_file and self.hide_files:
@@ -99,6 +128,7 @@ class DirectoryMapper:
                 return True
         return False
 
+<<<<<<< HEAD
     def _tick_item(self) -> bool:
         self._items_seen += 1
         if self._items_seen > self.max_items:
@@ -262,12 +292,17 @@ class DirectoryMapper:
         self._stats["top_extensions"] = ext_rows[:TOP_LIMIT]
 
     def scan_directory(self, root_path: str) -> Dict[str, Any]:
+=======
+    def scan_directory(self, root_path: str) -> Dict[str, Any]:
+        """Varre o diretório de forma iterativa (sem recursão profunda) usando os.scandir."""
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
         root = Path(root_path)
         if not root.exists():
             return {"error": "Diretório não encontrado"}
         if not root.is_dir():
             return {"error": "Caminho não é um diretório"}
 
+<<<<<<< HEAD
         self._reset_stats(root)
         full_stats = self._measure_full_tree(root)
         max_depth = self.max_depth if self.max_depth is not None else DEFAULT_MAX_DEPTH_HARD
@@ -297,12 +332,81 @@ class DirectoryMapper:
         avg = int(self._stats["total_size"] / files) if files else 0
         self._stats["avg_file_size"] = avg
         self._stats["avg_file_size_human"] = human_size(avg)
+=======
+        self._items_seen = 0
+        self._truncated = False
+
+        max_depth = self.max_depth if self.max_depth is not None else DEFAULT_MAX_DEPTH_HARD
+        max_depth = min(max_depth, DEFAULT_MAX_DEPTH_HARD)
+
+        result: Dict[str, Any] = {
+            "name": root.name or str(root),
+            "type": "directory",
+            "children": [],
+        }
+
+        # Pilha iterativa: (Path, node, depth)
+        stack = [(root, result, 0)]
+
+        try:
+            while stack:
+                current_path, current_node, depth = stack.pop()
+
+                if depth >= max_depth:
+                    continue
+
+                try:
+                    with os.scandir(current_path) as entries:
+                        items = list(entries)
+                except PermissionError:
+                    current_node["error"] = "Permissão negada"
+                    continue
+                except OSError:
+                    continue
+
+                # Ordena: pastas primeiro, depois arquivos, ambos alfabéticos
+                items.sort(key=lambda e: (e.is_file(follow_symlinks=False), e.name.lower()))
+
+                for entry in items:
+                    try:
+                        is_file = entry.is_file(follow_symlinks=False)
+                        is_dir = entry.is_dir(follow_symlinks=False)
+                    except OSError:
+                        continue
+
+                    if not is_file and not is_dir:
+                        continue  # ignora symlinks/sockets
+
+                    if self._should_skip(entry.name, is_file):
+                        continue
+
+                    self._items_seen += 1
+                    if self._items_seen > self.max_items:
+                        self._truncated = True
+                        raise ScanLimitExceeded()
+
+                    if is_file:
+                        current_node["children"].append({"name": entry.name, "type": "file"})
+                    else:
+                        child_node = {
+                            "name": entry.name,
+                            "type": "directory",
+                            "children": [],
+                        }
+                        current_node["children"].append(child_node)
+                        stack.append((Path(entry.path), child_node, depth + 1))
+        except ScanLimitExceeded:
+            pass
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 
         result["_meta"] = {
             "items_seen": self._items_seen,
             "truncated": self._truncated,
             "max_items": self.max_items,
+<<<<<<< HEAD
             "stats": self._stats,
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
         }
         return result
 
@@ -316,6 +420,7 @@ class DirectoryMapper:
 
         def walk(node: Dict[str, Any], prefix: str, is_last: bool, is_root: bool) -> None:
             name = node.get("name", "root")
+<<<<<<< HEAD
             size = node.get("size_human")
             size_tag = f"  [{size}]" if size else ""
             if is_root:
@@ -324,11 +429,26 @@ class DirectoryMapper:
                 connector = "└── " if is_last else "├── "
                 suffix = "/" if node.get("type") == "directory" else ""
                 lines.append(f"{prefix}{connector}{name}{suffix}{size_tag}\n")
+=======
+            if is_root:
+                lines.append(f"{name}/\n")
+            else:
+                connector = "└── " if is_last else "├── "
+                suffix = "/" if node.get("type") == "directory" else ""
+                lines.append(f"{prefix}{connector}{name}{suffix}\n")
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 
             children = node.get("children", []) or []
             for i, child in enumerate(children):
                 last = i == len(children) - 1
+<<<<<<< HEAD
                 new_prefix = "" if is_root else prefix + ("    " if is_last else "│   ")
+=======
+                if is_root:
+                    new_prefix = ""
+                else:
+                    new_prefix = prefix + ("    " if is_last else "│   ")
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
                 walk(child, new_prefix, last, False)
 
         walk(data, "", True, True)
@@ -352,12 +472,19 @@ class DirectoryMapper:
 
         def walk(node: Dict[str, Any], level: int) -> None:
             name = node.get("name", "root")
+<<<<<<< HEAD
             size = node.get("size_human", "")
             label = f"{name} | {size}" if size else name
             indent = "  " * level
             box_width = max(len(label) + 2, 9)
             lines.append(f"{indent}┌{'─' * box_width}┐\n")
             lines.append(f"{indent}│{label.center(box_width)}│\n")
+=======
+            indent = "  " * level
+            box_width = max(len(name) + 2, 9)
+            lines.append(f"{indent}┌{'─' * box_width}┐\n")
+            lines.append(f"{indent}│{name.center(box_width)}│\n")
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
             lines.append(f"{indent}└{'─' * box_width}┘\n")
 
             children = node.get("children", []) or []
@@ -368,11 +495,21 @@ class DirectoryMapper:
                         walk(child, level + 1)
                     else:
                         file_indent = "  " * (level + 1)
+<<<<<<< HEAD
                         lines.append(f"{file_indent}• {child['name']} [{child.get('size_human', '0 B')}]\n")
 
         walk(data, 0)
         if (data.get("_meta") or {}).get("truncated"):
             lines.append("\n... [TRUNCADO: limite de itens atingido. Aplique filtros.]\n")
+=======
+                        lines.append(f"{file_indent}• {child['name']}\n")
+
+        walk(data, 0)
+        if (data.get("_meta") or {}).get("truncated"):
+            lines.append(
+                f"\n... [TRUNCADO: limite de itens atingido. Aplique filtros.]\n"
+            )
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
         return "".join(lines)
 
     def _strip_meta(self, node: Dict[str, Any]) -> Dict[str, Any]:
@@ -395,17 +532,27 @@ class DirectoryMapper:
             content = self.generate_uml(data)
 
         meta = data.get("_meta") or {}
+<<<<<<< HEAD
         stats = meta.get("stats") or {}
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
         return {
             "content": content,
             "items": meta.get("items_seen", 0),
             "truncated": bool(meta.get("truncated")),
             "elapsed_ms": int(elapsed * 1000),
             "error": data.get("error") if "children" not in data else None,
+<<<<<<< HEAD
             "stats": stats,
         }
 
 
+=======
+        }
+
+
+# API para integração com Electron
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
 def map_directory_api(
     path: str,
     hidden_folders: str = "",
@@ -415,7 +562,11 @@ def map_directory_api(
     format_type: str = "uml",
     max_items: Optional[int] = None,
 ) -> str:
+<<<<<<< HEAD
     """Retorna JSON string com {content, items, truncated, elapsed_ms, error, stats}."""
+=======
+    """Retorna JSON string com {content, items, truncated, elapsed_ms, error}"""
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
     mapper = DirectoryMapper()
     mapper.set_filters(
         hidden_folders=hidden_folders,

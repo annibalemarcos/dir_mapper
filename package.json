@@ -1,7 +1,12 @@
 {
   "name": "dir-mapper",
+<<<<<<< HEAD
   "version": "0.3.3",
   "description": "Mapeador de estrutura de diretórios com dashboard, tamanhos legíveis e exportação de estatísticas",
+=======
+  "version": "0.2.0",
+  "description": "Mapeador de estrutura de diretórios — versão estável com Python embutido",
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -11,12 +16,16 @@
     "build-linux": "electron-builder --linux",
     "build-all-win": "npm run build-python && electron-builder --win"
   },
+<<<<<<< HEAD
   "keywords": [
     "directory",
     "mapper",
     "tree",
     "electron"
   ],
+=======
+  "keywords": ["directory", "mapper", "tree", "electron"],
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
   "author": "",
   "license": "MIT",
   "devDependencies": {
@@ -26,9 +35,13 @@
   "build": {
     "appId": "com.dirmapper.app",
     "productName": "DIR MAP",
+<<<<<<< HEAD
     "directories": {
       "output": "dist"
     },
+=======
+    "directories": { "output": "dist" },
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
     "files": [
       "main.js",
       "index.html",
@@ -36,6 +49,7 @@
       "package.json"
     ],
     "extraResources": [
+<<<<<<< HEAD
       {
         "from": "dir_mapper.py",
         "to": "dir_mapper.py"
@@ -57,10 +71,22 @@
           ]
         }
       ]
+=======
+      { "from": "dir_mapper.py", "to": "dir_mapper.py" },
+      {
+        "from": "bin/",
+        "to": "bin/",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }]
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
+<<<<<<< HEAD
       "perMachine": false,
       "artifactName": "${productName} Setup ${version}.${ext}"
     },
@@ -73,3 +99,11 @@
     }
   }
 }
+=======
+      "perMachine": false
+    },
+    "mac": { "target": "dmg" },
+    "linux": { "target": "AppImage", "category": "Utility" }
+  }
+}
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b

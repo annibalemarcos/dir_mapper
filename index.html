@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<<<<<<< HEAD
   <title>DIR MAP v0.3.3</title>
+=======
+  <title>DIR MAP v0.2</title>
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
   <style>
     :root {
       --bg: #0e0d0c;
@@ -16,7 +20,10 @@
       --accent-2: #ffd166;
       --danger: #ef4444;
       --success: #22c55e;
+<<<<<<< HEAD
       --info: #38bdf8;
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -25,7 +32,11 @@
       min-height: 100vh; padding: 24px; overflow: auto;
     }
     .container {
+<<<<<<< HEAD
       max-width: 980px; margin: 0 auto; background: var(--surface);
+=======
+      max-width: 720px; margin: 0 auto; background: var(--surface);
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
       border: 1px solid var(--border); border-radius: 14px; padding: 24px;
       box-shadow: 0 18px 50px rgba(0,0,0,.45);
     }
@@ -109,6 +120,7 @@
     select option { background: var(--surface-2); color: var(--text); }
     .container.loading { opacity: .85; }
     .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+<<<<<<< HEAD
 
     .dashboard {
       display: none; margin: 16px 0 18px; gap: 12px;
@@ -137,13 +149,19 @@
     .bar { height: 6px; background: #302b25; border-radius:999px; overflow:hidden; margin-top:5px; }
     .bar > i { display:block; height:100%; background: var(--accent); border-radius:999px; }
     @media (max-width: 760px) { .dash-grid { grid-template-columns: repeat(2, 1fr); } .dash-tables { grid-template-columns: 1fr; } }
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
   </style>
 </head>
 <body>
   <div class="container" id="container">
     <div class="header">
       <h1>DIR <span class="accent">MAP</span></h1>
+<<<<<<< HEAD
       <div class="subtitle">v0.3.3</div>
+=======
+      <div class="subtitle">v0.2</div>
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
     </div>
     <div class="subtitle">Mapeador de diretórios</div>
 
@@ -214,6 +232,7 @@
       </div>
     </div>
 
+<<<<<<< HEAD
     <div class="dashboard" id="dashboard">
       <div class="label-section">DASHBOARD DO DIRETÓRIO</div>
       <div class="dash-grid">
@@ -249,6 +268,8 @@
       </div>
     </div>
 
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
     <div class="label-section" style="margin-top: 14px;">RESULTADO</div>
     <div class="stats" id="stats" style="display:none;">
       <span class="pill" id="statItems">0 itens</span>
@@ -286,6 +307,7 @@
     setupToggle('toggleHideFiles', null);
     setupToggle('toggleRecursion', 'recursionInput');
 
+<<<<<<< HEAD
 
     let lastStats = null;
 
@@ -349,6 +371,8 @@
       renderRows('extensionsBody', stats.top_extensions || [], 'ext');
     }
 
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
     function showToast(msg, isError = false) {
       const el = document.getElementById('toast');
       el.textContent = msg;
@@ -384,7 +408,10 @@
       container.classList.add('loading');
       cancelWrap.style.display = 'inline-block';
       stats.style.display = 'none';
+<<<<<<< HEAD
       renderDashboard(null);
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
       output.value = 'Mapeando... (clique em CANCELAR para abortar)';
 
       const opts = {
@@ -411,8 +438,12 @@
           document.getElementById('statItems').textContent = `${res.items} itens`;
           document.getElementById('statTime').textContent = `${res.elapsed_ms} ms`;
           document.getElementById('statTrunc').style.display = res.truncated ? 'inline-block' : 'none';
+<<<<<<< HEAD
           renderDashboard(res.stats);
           showToast(res.truncated ? 'Mapa + dashboard gerados (truncado)' : 'Mapa + dashboard gerados!');
+=======
+          showToast(res.truncated ? 'Mapa gerado (truncado)' : 'Mapa gerado!');
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
         }
       } catch (err) {
         if (String(err.message).includes('CANCELADO')) {
@@ -429,6 +460,7 @@
       }
     }
 
+<<<<<<< HEAD
     function statsAsMarkdown(stats) {
       if (!stats) return '';
       const lines = [];
@@ -471,6 +503,8 @@
       return lines.join('\n');
     }
 
+=======
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
     async function exportFile(ext) {
       const content = document.getElementById('output').value;
       if (!content) { showToast('Nada para exportar', true); return; }
@@ -478,6 +512,7 @@
       if (r.success) showToast(`Salvo como .${ext}`);
       else if (!r.canceled) showToast('Erro ao salvar', true);
     }
+<<<<<<< HEAD
     function statsAsText(stats) {
       if (!stats) return '';
       const lines = [];
@@ -536,6 +571,11 @@
         () => showToast('Erro ao copiar estatísticas', true)
       );
     });
+=======
+    document.getElementById('exportMd').addEventListener('click', () => exportFile('md'));
+    document.getElementById('exportJson').addEventListener('click', () => exportFile('json'));
+    document.getElementById('exportTxt').addEventListener('click', () => exportFile('txt'));
+>>>>>>> 932198d66fd0a4be2e1de668ac4c75d3ac237d2b
     document.getElementById('copyBtn').addEventListener('click', () => {
       const c = document.getElementById('output').value;
       if (!c) { showToast('Nada para copiar', true); return; }
