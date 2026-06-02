@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DIR MAP v0.3.3</title>
+  <style>
+    :root {
+      --bg: #0e0d0c;
+      --surface: #1a1816;
+      --surface-2: #221f1c;
+      --border: #2c2823;
+      --text: #f0ede7;
+      --muted: #8a8278;
+      --accent: #f5a524;
+      --accent-2: #ffd166;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --info: #38bdf8;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; padding: 24px; overflow: auto;
+    }
+    .container {
+      max-width: 980px; margin: 0 auto; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 14px; padding: 24px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+    }
+    .header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+    h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+    h1 span.accent { color: var(--accent); }
+    .subtitle { font-size: 12px; color: var(--muted); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 22px; }
+    .row { display: flex; gap: 12px; margin-bottom: 14px; align-items: center; }
+    .col-1 { flex: 1; min-width: 0; }
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%; padding: 10px 14px;
+      background: var(--surface-2); color: var(--text);
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 14px; font-family: inherit; transition: border-color .15s, box-shadow .15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(245,165,36,.18);
+    }
+    button {
+      padding: 10px 18px; border: 1px solid transparent; border-radius: 10px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: transform .1s, background .15s, border-color .15s;
+      font-family: inherit;
+    }
+    .btn-primary { background: var(--accent); color: #18130a; }
+    .btn-primary:hover { background: var(--accent-2); }
+    .btn-secondary { background: var(--surface-2); color: var(--text); border-color: var(--border); }
+    .btn-secondary:hover { border-color: var(--accent); }
+    .btn-danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+    .btn-danger:hover { background: rgba(239,68,68,.1); }
+    .btn-small { padding: 8px 14px; font-size: 13px; }
+    .toggle-container { display: flex; align-items: center; gap: 10px; }
+    .toggle {
+      position: relative; width: 44px; height: 24px;
+      background: #3a342d; border-radius: 12px; cursor: pointer; transition: background .2s;
+      flex-shrink: 0;
+    }
+    .toggle.active { background: var(--accent); }
+    .toggle-knob {
+      position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+      background: #fff; border-radius: 50%; transition: transform .2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,.3);
+    }
+    .toggle.active .toggle-knob { transform: translateX(20px); }
+    .toggle-label { font-size: 13px; font-weight: 500; user-select: none; color: var(--text); }
+    .conditional-input { display: none; margin-top: 8px; }
+    .conditional-input.show { display: block; }
+    textarea {
+      min-height: 240px; max-height: 480px;
+      font-family: 'JetBrains Mono', 'Cascadia Code', 'Courier New', monospace;
+      font-size: 12.5px; line-height: 1.55; resize: vertical;
+    }
+    .label-section {
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.18em;
+    }
+    .export-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+    .toast {
+      position: fixed; top: 20px; right: 20px; background: var(--success);
+      color: #0a1c0d; padding: 12px 18px; border-radius: 10px;
+      font-size: 14px; font-weight: 600;
+      box-shadow: 0 6px 20px rgba(0,0,0,.4);
+      opacity: 0; transform: translateY(-10px); transition: all .25s;
+      pointer-events: none; z-index: 1000;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.error { background: var(--danger); color: #fff; }
+    .stats {
+      display: flex; gap: 14px; align-items: center;
+      font-size: 12px; color: var(--muted); margin-bottom: 8px;
+    }
+    .stats .pill {
+      padding: 3px 10px; background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 999px; color: var(--text); font-weight: 600;
+    }
+    .stats .pill.warn { color: var(--accent); border-color: var(--accent); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 560px) { .grid-2 { grid-template-columns: 1fr; } }
+    .map-actions { display: flex; gap: 8px; align-items: center; }
+    select option { background: var(--surface-2); color: var(--text); }
+    .container.loading { opacity: .85; }
+    .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    .dashboard {
+      display: none; margin: 16px 0 18px; gap: 12px;
+    }
+    .dashboard.show { display: block; }
+    .dash-grid {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;
+      margin-bottom: 12px;
+    }
+    .dash-card {
+      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01));
+      border: 1px solid var(--border); border-radius: 12px; padding: 12px;
+      min-height: 78px;
+    }
+    .dash-card strong { display:block; font-size: 20px; letter-spacing: -.02em; margin-top: 6px; }
+    .dash-card span { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing:.12em; }
+    .dash-card.accent { border-color: rgba(245,165,36,.45); box-shadow: inset 0 0 0 1px rgba(245,165,36,.06); }
+    .dash-tables { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .panel { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; overflow:hidden; }
+    .panel-title { color: var(--muted); font-size: 11px; font-weight:700; letter-spacing:.16em; text-transform: uppercase; margin-bottom: 8px; }
+    .mini-table { width:100%; border-collapse: collapse; font-size: 12px; }
+    .mini-table td { padding: 7px 0; border-top: 1px solid rgba(255,255,255,.055); color: var(--text); vertical-align: top; }
+    .mini-table tr:first-child td { border-top: 0; }
+    .mini-table td:nth-child(2) { text-align:right; color: var(--accent-2); white-space: nowrap; padding-left: 10px; }
+    .path-cell { color: var(--muted); word-break: break-all; }
+    .bar { height: 6px; background: #302b25; border-radius:999px; overflow:hidden; margin-top:5px; }
+    .bar > i { display:block; height:100%; background: var(--accent); border-radius:999px; }
+    @media (max-width: 760px) { .dash-grid { grid-template-columns: repeat(2, 1fr); } .dash-tables { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container" id="container">
+    <div class="header">
+      <h1>DIR <span class="accent">MAP</span></h1>
+      <div class="subtitle">v0.3.3</div>
+    </div>
+    <div class="subtitle">Mapeador de diretórios</div>
+
+    <div class="row">
+      <div class="col-1">
+        <input type="text" id="dirPath" placeholder="Cole o caminho ou clique em BROWSER" data-testid="dir-path-input" />
+      </div>
+      <div style="flex: 0 0 auto;">
+        <button class="btn-secondary" id="browserBtn" data-testid="browse-btn">BROWSER</button>
+      </div>
+      <div style="flex: 0 0 auto;">
+        <button class="btn-primary" id="mapBtn" data-testid="map-btn">MAPEAR</button>
+      </div>
+      <div style="flex: 0 0 auto; display:none;" id="cancelWrap">
+        <button class="btn-danger" id="cancelBtn" data-testid="cancel-btn">CANCELAR</button>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="toggle-container">
+          <div class="toggle active" id="toggleFolders" data-testid="toggle-folders"><div class="toggle-knob"></div></div>
+          <span class="toggle-label">Ocultar Pasta(s)</span>
+        </div>
+        <div class="conditional-input show" id="foldersInput">
+          <input type="text" id="hiddenFolders" data-testid="hidden-folders-input"
+            value="node_modules, .git, __pycache__, .venv, venv, dist, build, .next, .cache, target, .idea, .vscode" />
+          <div class="hint">Padrões pesados pré-preenchidos (recomendado).</div>
+        </div>
+      </div>
+      <div>
+        <div class="toggle-container">
+          <div class="toggle" id="toggleExtensions" data-testid="toggle-extensions"><div class="toggle-knob"></div></div>
+          <span class="toggle-label">Ocultar Extensão(ões)</span>
+        </div>
+        <div class="conditional-input" id="extensionsInput">
+          <input type="text" id="hiddenExtensions" data-testid="hidden-extensions-input" placeholder="Ex: .pyc, .log, .tmp" />
+        </div>
+      </div>
+      <div>
+        <div class="toggle-container">
+          <div class="toggle" id="toggleHideFiles" data-testid="toggle-hide-files"><div class="toggle-knob"></div></div>
+          <span class="toggle-label">Ocultar Todos os Arquivos</span>
+        </div>
+      </div>
+      <div>
+        <div class="toggle-container">
+          <div class="toggle" id="toggleRecursion" data-testid="toggle-recursion"><div class="toggle-knob"></div></div>
+          <span class="toggle-label">Controlar Recursividade</span>
+        </div>
+        <div class="conditional-input" id="recursionInput">
+          <input type="number" id="maxDepth" placeholder="Nível máx" min="1" value="5" data-testid="max-depth-input" />
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top: 16px;">
+      <div class="col-1">
+        <select id="formatType" data-testid="format-select">
+          <option value="uml">UML / TREE</option>
+          <option value="json">JSON</option>
+          <option value="diagram">DIAGRAMA</option>
+        </select>
+      </div>
+      <div style="flex:0 0 auto;">
+        <input type="number" id="maxItems" min="1000" step="1000" value="100000" title="Limite de itens" style="width:130px" data-testid="max-items-input" />
+        <div class="hint">Limite de itens</div>
+      </div>
+    </div>
+
+    <div class="dashboard" id="dashboard">
+      <div class="label-section">DASHBOARD DO DIRETÓRIO</div>
+      <div class="dash-grid">
+        <div class="dash-card accent"><span>Tamanho total real</span><strong id="dashTotalSize">0 B</strong></div>
+        <div class="dash-card"><span>Arquivos</span><strong id="dashFiles">0</strong></div>
+        <div class="dash-card"><span>Pastas</span><strong id="dashDirs">0</strong></div>
+        <div class="dash-card"><span>Profundidade</span><strong id="dashDepth">0</strong></div>
+        <div class="dash-card"><span>Tamanho mapeado</span><strong id="dashMappedSize">0 B</strong></div>
+        <div class="dash-card"><span>Média por arquivo</span><strong id="dashAvg">0 B</strong></div>
+        <div class="dash-card"><span>Ignorados</span><strong id="dashSkipped">0</strong></div>
+        <div class="dash-card"><span>Sem permissão</span><strong id="dashDenied">0</strong></div>
+        <div class="dash-card"><span>Maior pasta mapeada</span><strong id="dashLargestDir">0 B</strong></div>
+      </div>
+      <div class="dash-tables">
+        <div class="panel">
+          <div class="panel-title">Pastas mais pesadas mapeadas</div>
+          <table class="mini-table"><tbody id="largestDirsBody"></tbody></table>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Extensões que mais pesam</div>
+          <table class="mini-table"><tbody id="extensionsBody"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <div id="statsExportBox" style="margin-top: 14px; display:none;">
+      <div class="label-section">EXPORTAR ESTATÍSTICAS COMO</div>
+      <div class="export-buttons">
+        <button class="btn-secondary btn-small" id="exportStatsMd" data-testid="export-stats-md">.MD</button>
+        <button class="btn-secondary btn-small" id="exportStatsJson" data-testid="export-stats-json">.JSON</button>
+        <button class="btn-secondary btn-small" id="exportStatsTxt" data-testid="export-stats-txt">.TXT</button>
+        <button class="btn-primary btn-small" id="copyStatsBtn" data-testid="copy-stats-btn">COPIAR STATS</button>
+      </div>
+    </div>
+
+    <div class="label-section" style="margin-top: 14px;">RESULTADO</div>
+    <div class="stats" id="stats" style="display:none;">
+      <span class="pill" id="statItems">0 itens</span>
+      <span class="pill" id="statTime">0 ms</span>
+      <span class="pill warn" id="statTrunc" style="display:none;">TRUNCADO</span>
+    </div>
+    <textarea id="output" readonly placeholder="O mapa aparecerá aqui..." data-testid="output-area"></textarea>
+
+    <div style="margin-top: 14px;">
+      <div class="label-section">EXPORTAR COMO</div>
+      <div class="export-buttons">
+        <button class="btn-secondary btn-small" id="exportMd" data-testid="export-md">.MD</button>
+        <button class="btn-secondary btn-small" id="exportJson" data-testid="export-json">.JSON</button>
+        <button class="btn-secondary btn-small" id="exportTxt" data-testid="export-txt">.TXT</button>
+        <button class="btn-primary btn-small" id="copyBtn" data-testid="copy-btn">COPIAR</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    function setupToggle(toggleId, inputId) {
+      const t = document.getElementById(toggleId);
+      const i = inputId ? document.getElementById(inputId) : null;
+      t.addEventListener('click', () => {
+        t.classList.toggle('active');
+        if (i) i.classList.toggle('show');
+      });
+    }
+    setupToggle('toggleFolders', 'foldersInput');
+    setupToggle('toggleExtensions', 'extensionsInput');
+    setupToggle('toggleHideFiles', null);
+    setupToggle('toggleRecursion', 'recursionInput');
+
+
+    let lastStats = null;
+
+    function fmtInt(n) { return Number(n || 0).toLocaleString('pt-BR'); }
+    function fmtBytes(bytes) {
+      const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+      let value = Number(bytes || 0);
+      let i = 0;
+      while (Math.abs(value) >= 1024 && i < units.length - 1) {
+        value /= 1024;
+        i++;
+      }
+      return i === 0 ? `${Math.round(value)} ${units[i]}` : `${value.toFixed(2)} ${units[i]}`;
+    }
+    function human(v, fallback = '0 B') {
+      if (v && typeof v === 'object') return v.size_human || fmtBytes(v.size) || fallback;
+      return String(v || fallback);
+    }
+    function escapeHtml(v) {
+      return String(v ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+    function renderRows(targetId, rows, kind) {
+      const body = document.getElementById(targetId);
+      body.innerHTML = '';
+      if (!rows || !rows.length) {
+        body.innerHTML = '<tr><td class="path-cell">Nada relevante por aqui.</td><td>—</td></tr>';
+        return;
+      }
+      const max = Math.max(...rows.map(r => Number(r.size || 0)), 1);
+      body.innerHTML = rows.slice(0, 8).map(r => {
+        const label = kind === 'ext'
+          ? `.${escapeHtml(r.extension)} <span class="path-cell">(${fmtInt(r.count)} arq.)</span>`
+          : `<span class="path-cell">${escapeHtml(r.path || r.name)}</span>`;
+        const pct = Math.max(2, Math.round((Number(r.size || 0) / max) * 100));
+        return `<tr><td>${label}<div class="bar"><i style="width:${pct}%"></i></div></td><td>${escapeHtml(r.size_human || '0 B')}</td></tr>`;
+      }).join('');
+    }
+    function renderDashboard(stats) {
+      const dash = document.getElementById('dashboard');
+      const statsExportBox = document.getElementById('statsExportBox');
+      if (!stats) {
+        lastStats = null;
+        dash.classList.remove('show');
+        if (statsExportBox) statsExportBox.style.display = 'none';
+        return;
+      }
+      lastStats = stats;
+      dash.classList.add('show');
+      if (statsExportBox) statsExportBox.style.display = 'block';
+      document.getElementById('dashTotalSize').textContent = stats.total_size_human || fmtBytes(stats.total_size);
+      document.getElementById('dashFiles').textContent = fmtInt(stats.files);
+      document.getElementById('dashDirs').textContent = fmtInt(stats.directories);
+      document.getElementById('dashDepth').textContent = fmtInt(stats.max_depth_reached);
+      document.getElementById('dashMappedSize').textContent = stats.mapped_size_human || fmtBytes(stats.mapped_size);
+      document.getElementById('dashAvg').textContent = stats.avg_file_size_human || fmtBytes(stats.avg_file_size);
+      document.getElementById('dashSkipped').textContent = fmtInt(stats.skipped);
+      document.getElementById('dashDenied').textContent = fmtInt(stats.permission_errors);
+      const biggest = (stats.largest_dirs || [])[0];
+      document.getElementById('dashLargestDir').textContent = biggest ? biggest.size_human : '0 B';
+      renderRows('largestDirsBody', stats.largest_dirs || [], 'dir');
+      renderRows('extensionsBody', stats.top_extensions || [], 'ext');
+    }
+
+    function showToast(msg, isError = false) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.toggle('error', isError);
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2800);
+    }
+
+    document.getElementById('browserBtn').addEventListener('click', async () => {
+      const p = await ipcRenderer.invoke('select-directory');
+      if (p) document.getElementById('dirPath').value = p;
+    });
+
+    document.getElementById('mapBtn').addEventListener('click', mapDirectory);
+    document.getElementById('cancelBtn').addEventListener('click', async () => {
+      await ipcRenderer.invoke('cancel-mapping');
+    });
+    document.getElementById('formatType').addEventListener('change', () => {
+      if (document.getElementById('output').value) mapDirectory();
+    });
+
+    let mapping = false;
+    async function mapDirectory() {
+      if (mapping) return;
+      const path = document.getElementById('dirPath').value.trim();
+      if (!path) { showToast('Informe um caminho', true); return; }
+
+      const container = document.getElementById('container');
+      const output = document.getElementById('output');
+      const cancelWrap = document.getElementById('cancelWrap');
+      const stats = document.getElementById('stats');
+      mapping = true;
+      container.classList.add('loading');
+      cancelWrap.style.display = 'inline-block';
+      stats.style.display = 'none';
+      renderDashboard(null);
+      output.value = 'Mapeando... (clique em CANCELAR para abortar)';
+
+      const opts = {
+        path,
+        hiddenFolders: document.getElementById('toggleFolders').classList.contains('active')
+          ? document.getElementById('hiddenFolders').value : '',
+        hiddenExtensions: document.getElementById('toggleExtensions').classList.contains('active')
+          ? document.getElementById('hiddenExtensions').value : '',
+        hideFiles: document.getElementById('toggleHideFiles').classList.contains('active'),
+        maxDepth: document.getElementById('toggleRecursion').classList.contains('active')
+          ? parseInt(document.getElementById('maxDepth').value, 10) : null,
+        maxItems: parseInt(document.getElementById('maxItems').value, 10) || 100000,
+        formatType: document.getElementById('formatType').value,
+      };
+
+      try {
+        const res = await ipcRenderer.invoke('map-directory', opts);
+        if (res && res.error) {
+          output.value = 'Erro: ' + res.error;
+          showToast(res.error, true);
+        } else {
+          output.value = res.content || '';
+          stats.style.display = 'flex';
+          document.getElementById('statItems').textContent = `${res.items} itens`;
+          document.getElementById('statTime').textContent = `${res.elapsed_ms} ms`;
+          document.getElementById('statTrunc').style.display = res.truncated ? 'inline-block' : 'none';
+          renderDashboard(res.stats);
+          showToast(res.truncated ? 'Mapa + dashboard gerados (truncado)' : 'Mapa + dashboard gerados!');
+        }
+      } catch (err) {
+        if (String(err.message).includes('CANCELADO')) {
+          output.value = 'Cancelado pelo usuário.';
+          showToast('Cancelado', true);
+        } else {
+          output.value = 'Erro: ' + err.message;
+          showToast('Erro ao mapear', true);
+        }
+      } finally {
+        mapping = false;
+        container.classList.remove('loading');
+        cancelWrap.style.display = 'none';
+      }
+    }
+
+    function statsAsMarkdown(stats) {
+      if (!stats) return '';
+      const lines = [];
+      lines.push(`# Estatísticas do DIR MAP`);
+      lines.push('');
+      lines.push(`- **Raiz:** ${stats.root || stats.root_name || '—'}`);
+      lines.push(`- **Tamanho total real:** ${stats.total_size_human || fmtBytes(stats.total_size)}`);
+      lines.push(`- **Tamanho mapeado:** ${stats.mapped_size_human || fmtBytes(stats.mapped_size)}`);
+      lines.push(`- **Arquivos:** ${fmtInt(stats.files)}`);
+      lines.push(`- **Pastas:** ${fmtInt(stats.directories)}`);
+      lines.push(`- **Profundidade máxima:** ${fmtInt(stats.max_depth_reached)}`);
+      lines.push(`- **Média por arquivo:** ${stats.avg_file_size_human || fmtBytes(stats.avg_file_size)}`);
+      lines.push(`- **Itens ignorados:** ${fmtInt(stats.skipped)}`);
+      lines.push(`- **Erros de permissão:** ${fmtInt(stats.permission_errors)}`);
+      lines.push('');
+
+      lines.push(`## Pastas mais pesadas mapeadas`);
+      lines.push('');
+      lines.push('| Pasta | Tamanho | Itens diretos |');
+      lines.push('|---|---:|---:|');
+      const dirs = stats.largest_dirs || [];
+      if (dirs.length) {
+        dirs.forEach(d => lines.push(`| ${String(d.path || d.name || '—').replace(/\|/g, '\\|')} | ${d.size_human || fmtBytes(d.size)} | ${fmtInt(d.children)} |`));
+      } else {
+        lines.push('| — | 0 B | 0 |');
+      }
+      lines.push('');
+
+      lines.push(`## Extensões que mais pesam`);
+      lines.push('');
+      lines.push('| Extensão | Arquivos | Tamanho |');
+      lines.push('|---|---:|---:|');
+      const exts = stats.top_extensions || [];
+      if (exts.length) {
+        exts.forEach(e => lines.push(`| ${e.extension || '[sem extensão]'} | ${fmtInt(e.count)} | ${e.size_human || fmtBytes(e.size)} |`));
+      } else {
+        lines.push('| — | 0 | 0 B |');
+      }
+      lines.push('');
+      return lines.join('\n');
+    }
+
+    async function exportFile(ext) {
+      const content = document.getElementById('output').value;
+      if (!content) { showToast('Nada para exportar', true); return; }
+      const r = await ipcRenderer.invoke('save-file', { content, extension: ext });
+      if (r.success) showToast(`Salvo como .${ext}`);
+      else if (!r.canceled) showToast('Erro ao salvar', true);
+    }
+    function statsAsText(stats) {
+      if (!stats) return '';
+      const lines = [];
+      lines.push('ESTATÍSTICAS DO DIR MAP');
+      lines.push('');
+      lines.push(`Raiz: ${stats.root || stats.root_name || '—'}`);
+      lines.push(`Tamanho total real: ${stats.total_size_human || fmtBytes(stats.total_size)}`);
+      lines.push(`Tamanho mapeado: ${stats.mapped_size_human || fmtBytes(stats.mapped_size)}`);
+      lines.push(`Arquivos: ${fmtInt(stats.files)}`);
+      lines.push(`Pastas: ${fmtInt(stats.directories)}`);
+      lines.push(`Profundidade máxima: ${fmtInt(stats.max_depth_reached)}`);
+      lines.push(`Média por arquivo: ${stats.avg_file_size_human || fmtBytes(stats.avg_file_size)}`);
+      lines.push(`Itens ignorados: ${fmtInt(stats.skipped)}`);
+      lines.push(`Erros de permissão: ${fmtInt(stats.permission_errors)}`);
+      lines.push('');
+      lines.push('PASTAS MAIS PESADAS MAPEADAS');
+      (stats.largest_dirs || []).slice(0, 8).forEach(d => {
+        lines.push(`- ${d.path || d.name || '—'}: ${d.size_human || fmtBytes(d.size)} (${fmtInt(d.children)} itens diretos)`);
+      });
+      if (!(stats.largest_dirs || []).length) lines.push('- —');
+      lines.push('');
+      lines.push('EXTENSÕES QUE MAIS PESAM');
+      (stats.top_extensions || []).slice(0, 8).forEach(e => {
+        lines.push(`- ${e.extension || '[sem extensão]'}: ${fmtInt(e.count)} arquivo(s), ${e.size_human || fmtBytes(e.size)}`);
+      });
+      if (!(stats.top_extensions || []).length) lines.push('- —');
+      return lines.join('\n');
+    }
+
+    function statsPayload(ext) {
+      if (!lastStats) return '';
+      if (ext === 'json') return JSON.stringify(lastStats, null, 2);
+      if (ext === 'txt') return statsAsText(lastStats);
+      return statsAsMarkdown(lastStats);
+    }
+
+    async function exportStatsFile(ext) {
+      if (!lastStats) { showToast('Mapeie um diretório antes de exportar estatísticas', true); return; }
+      const content = statsPayload(ext);
+      const r = await ipcRenderer.invoke('save-file', { content, extension: ext, defaultName: 'dir_map_estatisticas' });
+      if (r.success) showToast(`Estatísticas salvas em .${ext}`);
+      else if (!r.canceled) showToast('Erro ao salvar estatísticas', true);
+    }
+
+    document.getElementById('exportMd').addEventListener('click', () => exportFile('md'));
+    document.getElementById('exportJson').addEventListener('click', () => exportFile('json'));
+    document.getElementById('exportTxt').addEventListener('click', () => exportFile('txt'));
+    document.getElementById('exportStatsMd').addEventListener('click', () => exportStatsFile('md'));
+    document.getElementById('exportStatsJson').addEventListener('click', () => exportStatsFile('json'));
+    document.getElementById('exportStatsTxt').addEventListener('click', () => exportStatsFile('txt'));
+    document.getElementById('copyStatsBtn').addEventListener('click', () => {
+      if (!lastStats) { showToast('Nada de estatísticas para copiar', true); return; }
+      const c = statsAsMarkdown(lastStats);
+      navigator.clipboard.writeText(c).then(
+        () => showToast('Estatísticas copiadas!'),
+        () => showToast('Erro ao copiar estatísticas', true)
+      );
+    });
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const c = document.getElementById('output').value;
+      if (!c) { showToast('Nada para copiar', true); return; }
+      navigator.clipboard.writeText(c).then(
+        () => showToast('Copiado!'),
+        () => showToast('Erro ao copiar', true)
+      );
+    });
+  </script>
+</body>
+</html>
